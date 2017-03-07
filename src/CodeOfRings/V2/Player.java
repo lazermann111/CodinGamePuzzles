@@ -1,23 +1,14 @@
-
+package CodeOfRings.V2;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
-/**
- * Auto-generated code below aims at helping you parse
- * the standard input according to the problem statement.
- **/
 class Player {
 
     public static String Alphabet = " abcdefghijklmnopqrstuvwxyz".toUpperCase();;
     public static char[] Alphabet_Array = Alphabet.toCharArray();;
     public static int Alphabet_SIZE = Alphabet.length();
-/*>: Bilbo moves one zone to the right.
-<: Bilbo moves one zone to the left.
-+: Bilbo rolls the letter on the rune of the zone he is in one letter along the alphabet.
-            -: Bilbo rolls the letter on the rune of the zone he is in one letter back through the alphabet.
-.: Bilbo triggers the rune to add its letter to the magic phrase.*/
 
     public static char MOVE_RIGHT = '>';
     public static char MOVE_LEFT = '<';
@@ -31,7 +22,7 @@ class Player {
     public static void main(String args[]) {
         Scanner in = new Scanner(System.in);
         String magicPhrase = in.nextLine();
-        System.err.println("magicPhrase " + magicPhrase);
+        //System.err.println("magicPhrase " + magicPhrase);
         // Write an action using System.out.println()
         // To debug: System.err.println("Debug messages...");
         StringBuilder result = new StringBuilder();
@@ -44,10 +35,10 @@ class Player {
             {
                 int t =  WordRunePosition.get(c) - CurrentRune;
                 MoveToRune(result, t);
-                System.err.println("CurrentRune is " + CurrentRune);
-                System.err.println("WordRunePosition for " + prevChar + " is " + WordRunePosition.get(prevChar));
+                //System.err.println("CurrentRune is " + CurrentRune);
+                //System.err.println("WordRunePosition for " + prevChar + " is " + WordRunePosition.get(prevChar));
                 assert (CurrentRune == WordRunePosition.get(prevChar));
-                System.err.println("WordRunePosition for " + c + " is " + WordRunePosition.get(c));
+                //System.err.println("WordRunePosition for " + c + " is " + WordRunePosition.get(c));
             }
             else
             {
@@ -64,10 +55,10 @@ class Player {
                             idx = a; break;
                         }
                     }
-                    System.err.println("free rune found " + idx);
+                    //System.err.println("free rune found " + idx);
                     MoveToRune(result, idx - CurrentRune );
                     CurrentRune = idx;
-                    System.err.println("new CurrentRune " + CurrentRune);
+                    //System.err.println("new CurrentRune " + CurrentRune);
                 }
                 // System.err.println("currentRunePosition letter" + Alphabet_Array [currentRuneLetter]);
                 int relativeCharIndex = Alphabet.indexOf(c);// - currentRuneLetter;
@@ -77,11 +68,11 @@ class Player {
                 {
                     relativeCharIndex -= Alphabet_SIZE;
                 }
-                System.err.println("relativeCharIndex " + relativeCharIndex);
+                //System.err.println("relativeCharIndex " + relativeCharIndex);
                 if(relativeCharIndex != 0)
                 {
                     char command = relativeCharIndex > 0 ? LETTER_FORWARD : LETTER_BACKWARD;
-                    System.err.println("command " + command);
+                    //System.err.println("command " + command);
                     appendMultiple(result, command, Math.abs(relativeCharIndex) );
                 }
                 WordRunePosition.put(c, CurrentRune);

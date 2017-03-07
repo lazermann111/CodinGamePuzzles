@@ -1,111 +1,15 @@
-package GhostInTheCell.v1;
+package GhostInTheCell.V1;
+
 
 import com.sun.javafx.geom.Vec3f;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-/**
- * Auto-generated code below aims at helping you parse
- * the standard input according to the problem statement.
- **/
-
-/*Initialization input
-        Line 1:factoryCount, the number of factories.
-        Line 2:linkCount, the number of links between factories.
-        Next linkCount lines: 3 space-separated integers factory1, factory2 and distance, where distance is the number of turns needed for a troop to travel between factory1 and factory2.
-        Input for one game turn
-        Line 1: an integer entityCount, the number of entities.
-        Next entityCount lines: an integer entityId, a string entityType and 5 integers arg1, arg2, arg3, arg4 and arg5.
-
-        If entityType equals FACTORY then the arguments are:
-        arg1: player that owns the factory: 1 for you, -1 for your opponent and 0 if neutral
-        arg2: number of cyborgs in the factory
-        arg3: factory production (between 0 and 3)
-        arg4: unused
-        arg5: unused
-
-        If entityType equals TROOP then the arguments are:
-        arg1: player that owns the troop: 1 for you or -1 for your opponent
-        arg2: identifier of the factory from where the troop leaves
-        arg3: identifier of the factory targeted by the troop
-        arg4: number of cyborgs in the troop (positive integer)
-        arg5: remaining number of turns before the troop arrives (positive integer)
-
-*/
 class Player {
 
 
-    class Factory
-    {
-        public int Id;
-        public int CyborgsAmount;
-        public int Production;
-        public OwnerType Owner;
 
-        public Factory(int id, int cyborgsAmount, int production) {
-            Id = id;
-            CyborgsAmount = cyborgsAmount;
-            Production = production;
-        }
-
-        @Override
-        public String toString() {
-            return "Factory{" +
-                    "Id=" + Id +
-                    ", CyborgsAmount=" + CyborgsAmount +
-                    ", Production=" + Production +
-                    ", Owner=" + Owner +
-                    '}';
-        }
-
-        public String MoveTo(int destinationId, int amount)
-        {
-            return "MOVE " + Id + " " + destinationId+ " " + amount+";";
-        }
-
-        public String UpgradeFactory()
-        {
-            return "INC " + Id +";";
-        }
-
-        public String SendBomb(int destinationId)
-        {
-            return "BOMB " + Id + " " + destinationId+";";
-        }
-    }
-
-    class Troops
-    {
-        public int Id;
-        public int SourceFactoryId;
-        public int DestinationFactoryId;
-        public int Amount;
-        public int TurnsToDestination;
-        public OwnerType Owner;
-
-        public Troops(int id, int sourceFactoryId, int destinationFactoryId, int amount, int turnsToDestination) {
-            Id = id;
-            SourceFactoryId = sourceFactoryId;
-            DestinationFactoryId = destinationFactoryId;
-            Amount = amount;
-            TurnsToDestination = turnsToDestination;
-        }
-
-        @Override
-        public String toString() {
-            return "Troops{" +
-                    "Id=" + Id +
-                    ", SourceFactoryId=" + SourceFactoryId +
-                    ", DestinationFactoryId=" + DestinationFactoryId +
-                    ", Amount=" + Amount +
-                    ", TurnsToDestination=" + TurnsToDestination +
-                    ", Owner=" + Owner +
-                    '}';
-        }
-    }
-
-    enum OwnerType {ME , NEUTRAL , OPPONENT};
 
     public List<Factory> factories = new ArrayList<>();
     public List<Troops> troops = new ArrayList<>();
@@ -232,13 +136,14 @@ class Player {
 
     public Factory StongestFactory(OwnerType owner)
     {
-        Factory res = factories.stream()
+        Optional<Factory> a = factories.stream()
                 .filter(f -> f.Owner == owner)
-                .sorted(Comparator.comparingInt(a -> -a.CyborgsAmount))
+                .sorted(Comparator.comparingInt(a1 -> -a1.CyborgsAmount))
                 .findFirst()
-                .get();
-        System.err.println(" StongestFactory " + res);
-        return res;
+                ;
+
+        a.ifPresent(factory -> System.err.println(" StongestFactory " + factory));
+        return a.isPresent() ? a.get() : null;
     }
 
     public Factory NearestFactory(int originId, OwnerType ownerType, int minProduction)
@@ -305,5 +210,81 @@ class Player {
         p.Init().Run();
     }
 }
+
+
+class Factory
+{
+    public int Id;
+    public int CyborgsAmount;
+    public int Production;
+    public OwnerType Owner;
+
+    public Factory(int id, int cyborgsAmount, int production) {
+        Id = id;
+        CyborgsAmount = cyborgsAmount;
+        Production = production;
+    }
+
+    @Override
+    public String toString() {
+        return "Factory{" +
+                "Id=" + Id +
+                ", CyborgsAmount=" + CyborgsAmount +
+                ", Production=" + Production +
+                ", Owner=" + Owner +
+                '}';
+    }
+
+    public String MoveTo(int destinationId, int amount)
+    {
+        return "MOVE " + Id + " " + destinationId+ " " + amount+";";
+    }
+
+    public String UpgradeFactory()
+    {
+        return "INC " + Id +";";
+    }
+
+    public String SendBomb(int destinationId)
+    {
+        return "BOMB " + Id + " " + destinationId+";";
+    }
+}
+
+class Troops
+{
+    public int Id;
+    public int SourceFactoryId;
+    public int DestinationFactoryId;
+    public int Amount;
+    public int TurnsToDestination;
+    public OwnerType Owner;
+
+    public Troops(int id, int sourceFactoryId, int destinationFactoryId, int amount, int turnsToDestination) {
+        Id = id;
+        SourceFactoryId = sourceFactoryId;
+        DestinationFactoryId = destinationFactoryId;
+        Amount = amount;
+        TurnsToDestination = turnsToDestination;
+    }
+
+    @Override
+    public String toString() {
+        return "Troops{" +
+                "Id=" + Id +
+                ", SourceFactoryId=" + SourceFactoryId +
+                ", DestinationFactoryId=" + DestinationFactoryId +
+                ", Amount=" + Amount +
+                ", TurnsToDestination=" + TurnsToDestination +
+                ", Owner=" + Owner +
+                '}';
+    }
+}
+
+enum OwnerType
+{
+    ME, NEUTRAL, OPPONENT
+}
+
 
 

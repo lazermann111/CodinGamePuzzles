@@ -1,11 +1,10 @@
-package GhostInTheCell.trunk;
+package GhostInTheCell.V2;
 
 import com.sun.javafx.geom.Vec3f;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static GhostInTheCell.trunk.Helpers.*;
 
 
 class Player {
@@ -58,8 +57,8 @@ class Player {
 
                 switch (entityType)
                 {
-                    case "FACTORY": AddFactory(factories,entityId,arg1, arg2 , arg3); break;
-                    case "TROOP": AddTroops(troops, entityId,arg1, arg2 , arg3, arg4, arg5); break;
+                    case "FACTORY": Helpers.AddFactory(factories,entityId,arg1, arg2 , arg3); break;
+                    case "TROOP": Helpers.AddTroops(troops,entityId,arg1, arg2 , arg3, arg4, arg5); break;
                     case "BOMB": break;
                     default: throw new IllegalStateException("Unknown entity type: " + entityType);
                 }
@@ -68,9 +67,9 @@ class Player {
             // Any valid action, such as "WAIT" or "MOVE source destination cyborgs"
             ///System.out.println("WAIT");
             StringBuilder res = new StringBuilder();
-            if(Tick == 0) MainBasesDistance = InitMainBasesDistance(StongestFactory(factories, OwnerType.ME), StongestFactory(factories,OwnerType.OPPONENT));
+            if(Tick == 0) MainBasesDistance = InitMainBasesDistance(Helpers.StongestFactory(factories, OwnerType.ME), Helpers.StongestFactory(factories, OwnerType.OPPONENT));
             if(Tick == 0 || Tick == 10) SendBombs(res);
-            Factory myStrongest = StongestFactory(factories, OwnerType.ME);
+            Factory myStrongest = Helpers.StongestFactory(factories, OwnerType.ME);
             if (myStrongest.CyborgsAmount > 0)
             {
 
@@ -85,25 +84,42 @@ class Player {
                 }
 
                 // Factory dest = NearestFactory(myStrongest.Id , OwnerType.NEUTRAL, 1);
-                float percentage = (Tick == 1) || (Tick == MainBasesDistance) ? 1 : 0.5f;
+              //  float percentage = (Tick == 1) || (Tick == MainBasesDistance) ? 1 : 0.5f;
                 // 0st tick - bomb,
                 // 1st - pushing all troops to enemy  main base
                 // MainBasesDistance - ETA of enemy bomb - pushing all troops away from base
 
-                Factory dest = Tick == 1 ?
-                        StongestFactory(factories, OwnerType.OPPONENT) :
-                        NearestFactory(factories, distances ,myStrongest.Id , OwnerType.NEUTRAL, 1);
+               /* Factory dest = Tick == 1 ?
+                        StongestFactory(OwnerType.OPPONENT) :
+                        NearestFactory(myStrongest.Id , OwnerType.NEUTRAL, 1);
                 if(dest == null)
                 {
-                    dest = NearestFactory(factories, distances ,myStrongest.Id , OwnerType.OPPONENT, 0);
+                    dest = NearestFactory(myStrongest.Id , OwnerType.OPPONENT, 0);
                     // percentage = Math.min(dest.CyborgsAmount + 1, myStrongest.CyborgsAmount * percentage) /myStrongest.CyborgsAmount  + 1;
                 }
                 if(dest != null && Tick != 0)// 0st tick - bomb only
                 {
-                    percentage = dest.CyborgsAmount + 1;
+                  //  percentage = dest.CyborgsAmount + 1;
                     DefendBases(res);
                     //System.out.println(myStrongest.MoveTo(dest.Id, percentage));
                     res.append(myStrongest.MoveTo(dest.Id, (int) (myStrongest.CyborgsAmount * percentage)))  ;
+                }*/
+
+                if(Helpers.MyFactories(factories).size() != 0)
+                {
+
+                         for(Factory f : Helpers.MyFactories(factories))
+                         {
+                            List<Factory> nearest =  Helpers.NearestFactories(factories, distances, f.Id)
+                                                            .subList(0,3);
+
+                            for (Factory f2 : nearest)
+                            {
+                                res.append(f.MoveTo(f2.Id, f2.CyborgsAmount/5));
+                            }
+                         }
+
+                         DefendBases(res);
                 }
                 else
                 {
@@ -124,20 +140,20 @@ class Player {
 
     private int InitMainBasesDistance(Factory f1, Factory f2)
     {
-        return DistanceToFactory(distances, f1.Id, f2.Id);
+        return Helpers.DistanceToFactory(distances,f1.Id, f2.Id);
     }
 
     private void DefendBases(StringBuilder res)
     {
-        for (Factory f : MyFactories(factories))
+        for (Factory f : Helpers.MyFactories(factories))
         {
-            List<Troops> myTroops = IncomingTroops(troops, f.Id, OwnerType.ME);
-            List<Troops> oppTroops = IncomingTroops(troops, f.Id, OwnerType.OPPONENT);
+            List<Troops> myTroops = Helpers.IncomingTroops(troops, f.Id, OwnerType.ME);
+            List<Troops> oppTroops = Helpers.IncomingTroops(troops, f.Id, OwnerType.OPPONENT);
 
             boolean needToDefend = myTroops.stream().mapToInt(a -> a.Amount).sum() + f.CyborgsAmount <= oppTroops.stream().mapToInt(a -> a.Amount).sum();
             if(needToDefend)
             {
-                Factory nearest = NearestFactory(factories,distances, f.Id, OwnerType.ME, 0);
+                Factory nearest = Helpers.NearestFactory(factories, distances, f.Id, OwnerType.ME, 0);
                 if(nearest != null)  res.append(nearest.MoveTo(f.Id, 2)) ;
             }
         }
@@ -145,10 +161,16 @@ class Player {
 
     private void SendBombs(StringBuilder res)
     {
-        Factory myStronget = StongestFactory(factories, OwnerType.ME);
-        Factory opponent = StongestFactory(factories, OwnerType.OPPONENT);
-        res.append(myStronget.SendBomb(opponent.Id));
+        Factory me = Helpers.StongestFactory(factories, OwnerType.ME);
+        Factory opponent = Helpers.StongestFactory(factories, OwnerType.OPPONENT);
+        res.append(me.SendBomb(opponent.Id));
     }
+
+
+
+
+
+
 
     public static void main(String args[])
     {
@@ -162,7 +184,7 @@ class Player {
 
 class Helpers
 {
-    public static void AddTroops(List<Troops> troops, int id, int owner, int source, int destination, int amount , int turnsToDestination)
+    public static void AddTroops(List<Troops> troops,int id, int owner, int source, int destination, int amount , int turnsToDestination)
     {
         Troops t = new Troops(id, source, destination, amount, turnsToDestination);
         switch (owner)
@@ -178,7 +200,7 @@ class Helpers
     }
 
 
-    public static void AddFactory(List<Factory> factories, int id, int owner, int cyborgs, int production)
+    public static void AddFactory(List<Factory> factories,int id, int owner, int cyborgs, int production)
     {
         Factory f = new Factory(id, cyborgs, production);
         switch (owner)
@@ -195,7 +217,7 @@ class Helpers
 
 
 
-    public static Factory StongestFactory(List<Factory> factories, OwnerType owner)
+    public static Factory StongestFactory(List<Factory> factories,OwnerType owner)
     {
         Factory res = factories.stream()
                 .filter(f -> f.Owner == owner)
@@ -218,11 +240,23 @@ class Helpers
         return a.isPresent() ? a.get() : null;
     }
 
+
+
     public static List<Factory> MyFactories(List<Factory> factories)
     {
-        return   factories.stream()
+        return  factories.stream()
                 .filter(f -> f.Owner == OwnerType.ME)
                 .collect(Collectors.toList());
+    }
+
+    public static List<Factory> NearestFactories(List<Factory> factories, List<Vec3f> distances, int originId)
+    {
+        List<Factory> res = factories.stream()
+                .filter(f -> DistanceToFactory(distances,originId, f.Id) != -1)
+                .sorted(Comparator.comparingInt(a -> DistanceToFactory(distances, originId, a.Id)))
+                .collect(Collectors.toList());
+        System.err.println(" NearestFactories for origin " + originId + "  is " + res);
+        return res;
     }
 
     public static List<Factory> NearestFactories(List<Factory> factories, List<Vec3f> distances, int originId, OwnerType ownerType, int minProduction, int maxCyborgs)
@@ -336,3 +370,8 @@ enum OwnerType
 {
     ME, NEUTRAL, OPPONENT
 }
+
+
+
+
+
