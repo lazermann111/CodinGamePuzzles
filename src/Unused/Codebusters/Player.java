@@ -80,7 +80,7 @@ class Player {
 
 	private void ChaseNearestGhost(Buster b) {
 		Ghost g = Helpers.NearestGhost(ghosts, b.Position);
-		if (g.)
+		//if (g.)
 	}
 
 	private void CarryGhostToBase(Buster b) {
